@@ -1,7 +1,12 @@
 #!/bin/bash
-set -e
 
-cd terraform
+cd lambda
+
+coverage run -m pytest
+
+coverage report -m
+
+cd ../terraform
 
 echo "Initializing Terraform..."
 terraform init

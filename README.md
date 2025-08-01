@@ -63,20 +63,30 @@ A user is created and confirmed in the Cognito User Pool.
 
 #### Steps to Retrieve JWT Using Postman:
 
+1st way:
+
+Set environment variables for CLIENT_ID (Cognito App client id), CLIENT_SECRET (Cognito app client secret), USERNAME (Cognito user from user pool), USER_PASSWD (Password for cognito user)
+
+```
+export CLIENT_ID = <Replace with cognito app client id>
+export CLIENT_SECRET = <Replace with cognito app client secret>
+export USERNAME = <Replace with user name>
+export USER_PASSWD = <Replace with user password>
+pip install requests
+python retrieve_token.py
+
+```
+copy id token from printed output.
+
+2nd Way:
+
 Go to Authorization → Select OAuth 2.0
-
 Set the following values:
-
 Callback URL → Configured in Cognito App Client
-
 Auth URL → https://<your-domain>.auth.<region>.amazoncognito.com/oauth2/authorize
-
 Access Token URL → https://<your-domain>.auth.<region>.amazoncognito.com/oauth2/token
-
 Client ID → Cognito App Client ID
-
 Client Secret → Cognito App Client Secret
-
 Click Get New Access Token and copy the JWT.
 
 Use the token in the request header:

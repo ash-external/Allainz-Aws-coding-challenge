@@ -30,7 +30,7 @@ class VpcManager:
         self.region_name = region_name
         logger.info("Initializing VpcManager in region: %s", region_name)
         self.ec2 = boto3.client("ec2", region_name=region_name)
-        dynamodb = boto3.resource("dynamodb")
+        dynamodb = boto3.resource("dynamodb", region_name=os.environ["DB_REGION"])
         self.table = dynamodb.Table(os.environ["TABLE_NAME"])
 
     def _normalize_vpc_record(self, record: dict) -> dict:
