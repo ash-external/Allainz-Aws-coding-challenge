@@ -37,7 +37,19 @@ Terraform (≥ 1.5.0)
 AWS Access Key & Secret Key with required IAM permissions
 
 ## Deployment Steps
+In order to run test cases perform below steps:
 
+```
+python -m venv .venv
+
+source .venv/Scripts/activate (windows)
+source .ven/bin/activate (Linux)
+pip install -r lambda/app/requirements.txt
+cd lambda
+coverage run -m pytest
+coverage report -m
+
+```
 Configure AWS Credentials
 
 ```
