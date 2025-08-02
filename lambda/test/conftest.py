@@ -5,12 +5,6 @@ from moto import mock_aws
 from fastapi.testclient import TestClient
 from app.main import app
 
-@pytest.fixture(scope="session", autouse=True)
-def set_env():
-    """Set environment variables before tests."""
-    os.environ["TABLE_NAME"] = "TestVpcTable"
-    os.environ["DB_REGION"] = "us-east-1"
-
 @pytest.fixture(scope="function")
 def aws_mock():
     """Mock AWS services EC2 & DynamoDB."""
@@ -23,8 +17,7 @@ def aws_mock():
             AttributeDefinitions=[{"AttributeName": "VpcId", "AttributeType": "S"}],
             BillingMode="PAY_PER_REQUEST"
         )
-        yield  # AWS mocks are active
-        # Moto automatically cleans up after exit
+        yield
 
 @pytest.fixture(scope="function")
 def test_client(aws_mock):

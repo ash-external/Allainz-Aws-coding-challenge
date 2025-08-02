@@ -23,7 +23,6 @@ async def test_create_and_get_vpc(aws_mock):
     assert "vpc_id" in result
     vpc_id = result["vpc_id"]
 
-    # Test get_vpc
     fetched = await vpc.get_vpc(vpc_id)
     assert fetched["vpc_id"] == vpc_id
     assert fetched["tags"][0]["Key"] == "Name"
@@ -56,3 +55,25 @@ async def test_delete_vpc(aws_mock):
 
     # Verify it no longer exists
     assert await vpc.get_vpc(vpc_id) is None
+
+
+@pytest.mark.asyncio
+async def test_create_vpc_invalid_cidr(aws_mock):
+    """Should fail when an invalid CIDR is provided."""
+    vpc_mgr = VpcManager(region_name="us-east-1")
+    result = await vpc_mgr.create_vpc("10.0.0.0", 2)
+    assert result is None
+
+@pytest.mark.asyncio
+async def test_get_vpc_not_found(aws_mock):
+    """Should return None if the VPC ID does not exist in DynamoDB."""
+    vpc_mgr = VpcManager(region_name="us-east-1")
+    vpc = await vpc_mgr.get_vpc("non-existent-vpc")
+    assert vpc is None
+
+@pytest.mark.asyncio
+async def test_update_vpc_nonexistent_id(aws_mock):
+    """Should raise an exception when updating a non-existent VPC."""
+    vpc_mgr = VpcManager(region_name="us-east-1")
+    with pytest.raises(Exception):
+        await vpc_mgr.update_vpc("vpc-invalid", [{"Key": "Env", "Value": "Dev"}])

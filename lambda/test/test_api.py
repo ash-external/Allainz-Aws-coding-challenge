@@ -22,7 +22,6 @@ async def test_list_vpcs_api(test_client):
 
 @pytest.mark.asyncio
 async def test_get_vpc_api(test_client):
-    # First create a VPC
     payload = {
         "vpc_cidr": "10.20.0.0/16",
         "subnet_count": 2,
@@ -31,14 +30,13 @@ async def test_get_vpc_api(test_client):
     create_resp = test_client.post("/create-vpc", json=payload)
     vpc_id = create_resp.json()["vpc_id"]
 
-    # Fetch via GET API
     resp = test_client.get(f"/get-vpc/{vpc_id}")
     assert resp.status_code == 200
     assert resp.json()["vpc_id"] == vpc_id
 
 @pytest.mark.asyncio
 async def test_update_vpc_api(test_client):
-    # Create VPC
+
     payload = {
         "vpc_cidr": "10.30.0.0/16",
         "subnet_count": 2,
@@ -46,7 +44,6 @@ async def test_update_vpc_api(test_client):
     }
     vpc_id = test_client.post("/create-vpc", json=payload).json()["vpc_id"]
 
-    # Update tags
     update_payload = {"vpc_tags": [{"Key": "Env", "Value": "QA"}], "region": "us-east-1"}
     resp = test_client.put(f"/update-vpc/{vpc_id}", json=update_payload)
     assert resp.status_code == 200
@@ -54,7 +51,6 @@ async def test_update_vpc_api(test_client):
 
 @pytest.mark.asyncio
 async def test_delete_vpc_api(test_client):
-    # Create VPC
     payload = {
         "vpc_cidr": "10.40.0.0/16",
         "subnet_count": 2,
@@ -62,7 +58,29 @@ async def test_delete_vpc_api(test_client):
     }
     vpc_id = test_client.post("/create-vpc", json=payload).json()["vpc_id"]
 
-    # Delete VPC
     resp = test_client.delete(f"/delete-vpc/{vpc_id}?region=us-east-1")
     assert resp.status_code == 200
     assert "deleted" in resp.json()["message"].lower()
+
+def test_get_vpc_api_not_found(test_client):
+    """GET should return 404 if VPC does not exist."""
+    response = test_client.get("/get-vpc/non-existent-vpc")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "VPC not found"
+
+def test_update_vpc_api_not_found(test_client):
+    """PUT should return 500 if updating a non-existent VPC fails."""
+    payload = {"region": "us-east-1", "vpc_tags": [{"Key": "Env", "Value": "Dev"}]}
+    response = test_client.put("/update-vpc/non-existent-vpc", json=payload)
+    assert response.status_code == 500
+
+def test_delete_vpc_api_not_found(test_client):
+    """DELETE should return 404 if the VPC does not exist."""
+    response = test_client.delete("/delete-vpc/non-existent-vpc?region=us-east-1")
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"]
+
+def test_create_vpc_api_invalid_payload(test_client):
+    """POST should fail with 422 if payload is invalid."""
+    response = test_client.post("/create-vpc", json={})
+    assert response.status_code == 422
